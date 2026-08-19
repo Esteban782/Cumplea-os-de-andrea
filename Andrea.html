@@ -1,0 +1,982 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>¡Feliz Cumpleaños, Andrea! ✨</title>
+  
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #d8b4fe;
+      --primary-dark: #a855f7;
+      --secondary: #f472b6;
+      --gold: #fbbf24;
+      --bg-dark: #12091d;
+      --font-heading: 'Playfair Display', serif;
+      --font-handwriting: 'Dancing Script', cursive;
+      --font-body: 'Montserrat', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-dark);
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background image overlays with gentle movement */
+    .bg-slideshow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.25;
+      transition: opacity 1.5s ease-in-out;
+    }
+
+    .bg-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px) brightness(0.6);
+      opacity: 0;
+      animation: bgFade 12s infinite ease-in-out;
+    }
+
+    .bg-slide:nth-child(1) {
+      background-image: url(https://pin.it/3oyuEl9K4);
+      animation-delay: 0s;
+    }
+
+    .bg-slide:nth-child(2) {
+      background-image: url(https://pin.it/5LnITSOCp);
+      animation-delay: 6s;
+    }
+
+    @keyframes bgFade {
+      0%, 45%, 100% { opacity: 0; transform: scale(1); }
+      15%, 35% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    /* Floating Sparkles & Sparkle canvas */
+    #sparkle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* -------------------------------------------------------------
+       GIFT BOX LANDING SCREEN (BEFORE ENTRY)
+    ------------------------------------------------------------- */
+    #gift-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: radial-gradient(circle at center, #2e1065 0%, #0f0728 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+
+    #gift-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .gift-title {
+      font-family: var(--font-handwriting);
+      font-size: 3.5rem;
+      color: #fbcfe8;
+      text-shadow: 0 0 20px rgba(244, 114, 182, 0.6);
+      margin-bottom: 10px;
+      animation: pulseText 2s infinite alternate;
+    }
+
+    .gift-subtitle {
+      font-size: 1.1rem;
+      color: #e9d5ff;
+      margin-bottom: 40px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Interactive 3D Gift Box */
+    .gift-container {
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      margin-bottom: 30px;
+    }
+
+    .gift-box {
+      position: relative;
+      width: 170px;
+      height: 170px;
+      background: linear-gradient(135deg, #ec4899, #be185d);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(236, 72, 153, 0.4);
+      animation: bounceBox 2s infinite ease-in-out;
+      transition: transform 0.3s ease;
+    }
+
+    .gift-container:hover .gift-box {
+      transform: scale(1.08) rotate(2deg);
+      box-shadow: 0 25px 50px rgba(236, 72, 153, 0.7);
+    }
+
+    .gift-ribbon-v {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 100%;
+      background: linear-gradient(to right, #fef08a, #f59e0b, #fef08a);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    .gift-ribbon-h {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      width: 100%;
+      height: 32px;
+      background: linear-gradient(to bottom, #fef08a, #f59e0b, #fef08a);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    .gift-lid {
+      position: absolute;
+      top: -20px;
+      left: -10px;
+      width: 190px;
+      height: 45px;
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2;
+    }
+
+    .gift-bow {
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 50px;
+      color: #f59e0b;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+      z-index: 3;
+    }
+
+    .click-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 12px 28px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 1rem;
+      color: #fbcfe8;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+
+    .click-hint:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-3px);
+    }
+
+    @keyframes bounceBox {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    @keyframes pulseText {
+      from { text-shadow: 0 0 10px #f472b6, 0 0 20px #f472b6; }
+      to { text-shadow: 0 0 20px #ec4899, 0 0 35px #a855f7, 0 0 50px #ec4899; }
+    }
+
+    /* -------------------------------------------------------------
+       FLOATING BALLOONS CONTAINER
+    ------------------------------------------------------------- */
+    #balloons-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: -150px;
+      width: 60px;
+      height: 75px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      animation: floatUp 10s linear infinite;
+      box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .balloon::before {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 10px solid inherit;
+    }
+
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      width: 2px;
+      height: 35px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(-110vh) rotate(20deg);
+        opacity: 0;
+      }
+    }
+
+    /* -------------------------------------------------------------
+       MAIN CELEBRATION CONTENT
+    ------------------------------------------------------------- */
+    #main-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px 80px 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1.2s ease 0.3s, transform 1.2s ease 0.3s;
+    }
+
+    #main-content.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Header Section */
+    .hero-header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .ts-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(216, 180, 254, 0.3), rgba(244, 114, 182, 0.3));
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 8px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fef08a;
+      margin-bottom: 15px;
+      backdrop-filter: blur(5px);
+    }
+
+    .main-title {
+      font-family: var(--font-heading);
+      font-size: 4rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #ffffff, #fbcfe8, #fef08a, #e9d5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .main-subtitle {
+      font-family: var(--font-handwriting);
+      font-size: 2.2rem;
+      color: var(--secondary);
+      letter-spacing: 1px;
+    }
+
+    /* Taylor Swift Photo Highlights Gallery Grid */
+    .photo-section {
+      margin-bottom: 60px;
+    }
+
+    .section-heading {
+      text-align: center;
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      color: #fef08a;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .section-heading::before,
+    .section-heading::after {
+      content: '';
+      height: 1px;
+      width: 60px;
+      background: linear-gradient(to right, transparent, #fef08a, transparent);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      justify-content: center;
+    }
+
+    /* Polaroids with Swiftie Aesthetic */
+    .polaroid-card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 16px 16px 25px 16px;
+      border-radius: 8px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 15px rgba(216, 180, 254, 0.3);
+      transform: rotate(-2deg);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+
+    .polaroid-card:nth-child(even) {
+      transform: rotate(3deg);
+    }
+
+    .polaroid-card:hover {
+      transform: scale(1.05) rotate(0deg) translateY(-10px);
+      box-shadow: 0 25px 50px rgba(244, 114, 182, 0.6);
+      z-index: 10;
+    }
+
+    .polaroid-img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      overflow: hidden;
+      border-radius: 4px;
+      background: #000;
+    }
+
+    .polaroid-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .polaroid-card:hover .polaroid-img-wrapper img {
+      transform: scale(1.08);
+    }
+
+    .polaroid-caption {
+      margin-top: 15px;
+      text-align: center;
+      font-family: var(--font-handwriting);
+      color: #1f2937;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    /* -------------------------------------------------------------
+       THE BIRTHDAY LETTER CARD
+    ------------------------------------------------------------- */
+    .letter-container {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(253, 242, 248, 0.92));
+      color: #292524;
+      padding: 45px 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(244, 114, 182, 0.2);
+      border: 2px solid rgba(251, 191, 36, 0.5);
+      margin-bottom: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .letter-container::before {
+      content: '💌';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      font-size: 120px;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .letter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px dashed #f472b6;
+      padding-bottom: 15px;
+      margin-bottom: 25px;
+    }
+
+    .letter-recipient {
+      font-family: var(--font-handwriting);
+      font-size: 2.5rem;
+      color: #9333ea;
+    }
+
+    .stamp {
+      background: #fbcfe8;
+      border: 2px dashed #db2777;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #9d174d;
+      border-radius: 4px;
+      transform: rotate(5deg);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .letter-body {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: #44403c;
+      margin-bottom: 25px;
+    }
+
+    .letter-body p {
+      margin-bottom: 18px;
+    }
+
+    .letter-body span.ts-quote {
+      font-family: var(--font-heading);
+      font-style: italic;
+      color: #be185d;
+      background: #fce7f3;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .letter-signature {
+      text-align: right;
+      font-family: var(--font-handwriting);
+      font-size: 2.2rem;
+      color: #db2777;
+      margin-top: 30px;
+    }
+
+    /* -------------------------------------------------------------
+       INTERACTIVE BIRTHDAY CAKE & WISHES
+    ------------------------------------------------------------- */
+    .cake-section {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 40px;
+    }
+
+    .cake-instructions {
+      font-size: 1.2rem;
+      color: #fbcfe8;
+      margin-bottom: 25px;
+    }
+
+    .cake-container {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .cake-emoji {
+      font-size: 100px;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+      transition: transform 0.3s ease;
+    }
+
+    .cake-container:hover .cake-emoji {
+      transform: scale(1.1);
+    }
+
+    .music-btn {
+      margin-top: 25px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .music-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 15px 30px rgba(236, 72, 153, 0.6);
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      padding: 20px;
+    }
+
+    .lightbox.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 85vh;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      color: white;
+      font-size: 35px;
+      cursor: pointer;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .main-title { font-size: 2.8rem; }
+      .main-subtitle { font-size: 1.8rem; }
+      .gift-title { font-size: 2.5rem; }
+      .letter-container { padding: 30px 20px; }
+      .polaroid-img-wrapper { height: 260px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated Background Slideshow featuring uploaded Taylor Swift photos -->
+  <div class="bg-slideshow">
+    <div class="bg-slide"></div>
+    <div class="bg-slide"></div>
+  </div>
+
+  <!-- Sparkle Particle Canvas -->
+  <canvas id="sparkle-canvas"></canvas>
+
+  <!-- Container for Floating Balloons -->
+  <div id="balloons-container"></div>
+
+  <!-- ==============================================================
+       1. GIFT LANDING SCREEN (REGALO DE CUMPLEAÑOS)
+  ============================================================== -->
+  <div id="gift-screen">
+    <h1 class="gift-title">¡Una sorpresa para Andrea! ✨</h1>
+    <p class="gift-subtitle">Taylor's Version</p>
+
+    <div class="gift-container" onclick="openGift()">
+      <div class="gift-lid" id="gift-lid">
+        <div class="gift-bow"><i class="fa-solid fa-ribbon"></i></div>
+      </div>
+      <div class="gift-box">
+        <div class="gift-ribbon-v"></div>
+        <div class="gift-ribbon-h"></div>
+      </div>
+    </div>
+
+    <div class="click-hint" onclick="openGift()">
+      <i class="fa-solid fa-gift"></i>
+      <span>Toca el regalo para abrir</span>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       2. MAIN BIRTHDAY CONTENT (SE ABRE TRAS TOCAR EL REGALO)
+  ============================================================== -->
+  <main id="main-content">
+    
+    <!-- Hero Header -->
+    <header class="hero-header">
+      <div class="ts-badge">✨ Fearless & Fabulous ✨</div>
+      <h1 class="main-title">¡Feliz Cumpleaños, Andrea! 💖</h1>
+      <p class="main-subtitle">"Long live all the magic we made..." 🎶</p>
+    </header>
+
+    <!-- Taylor Swift Photo Gallery -->
+    <section class="photo-section">
+      <h2 class="section-heading">
+        <i class="fa-solid fa-sparkles"></i>
+        Taylor Swift Birthday Vibes
+        <i class="fa-solid fa-sparkles"></i>
+      </h2>
+
+      <div class="gallery-grid">
+        <!-- Photo 1 (User Uploaded) -->
+        <div class="polaroid-card" onclick="openLightbox('1000031927.jpg')">
+          <div class="polaroid-img-wrapper">
+            <img src="1000031927.jpg" alt="Taylor Swift Happy Birthday Party Hat" />
+          </div>
+          <div class="polaroid-caption">Happy Birthday Andrea! 🎉</div>
+        </div>
+
+        <!-- Photo 2 (User Uploaded) -->
+        <div class="polaroid-card" onclick="openLightbox('1000031928.jpg')">
+          <div class="polaroid-img-wrapper">
+            <img src="1000031928.jpg" alt="Taylor Swift Birthday Girl Cake and Cat" />
+          </div>
+          <div class="polaroid-caption">Birthday Girl Era ✨</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Birthday Letter Section -->
+    <section class="letter-section">
+      <div class="letter-container">
+        <div class="letter-header">
+          <div class="letter-recipient">Querida Andrea,</div>
+          <div class="stamp">Swiftie Edition</div>
+        </div>
+
+        <div class="letter-body">
+          <p>¡Hoy es un día súper especial! Espero que este nuevo año de vida esté lleno de momentos mágicos, risas infinitas y todas las canciones de Taylor Swift sonando a todo volumen en tu honor.</p>
+          
+          <p>Deseo de todo corazón que cumplas cada uno de tus sueños, que sigas brillando con esa luz bonita tan única que tienes y que nunca te falte la alegría. Como diría Taylor: <span class="ts-quote">"Best believe I'm still bejeweled, when I walk in the room, I can still make the whole place shimmer."</span> ¡Sigue deslumbrando al mundo entero!</p>
+
+          <p>Que esta nueva vuelta al sol te traiga aventuras inolvidables, salud, amor y mucha felicidad. Disfruta tu día al máximo rodeada de la gente que te quiere.</p>
+        </div>
+
+        <div class="letter-signature">
+          Con todo mi cariño, <br/>
+          ¡Feliz Cumpleaños! 🎂✨
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Candle & Song Section -->
+    <section class="cake-section">
+      <h2 style="font-family: var(--font-heading); font-size: 2rem; color: #fef08a; margin-bottom: 10px;">
+        Haz un deseo ✨
+      </h2>
+      <p class="cake-instructions">Toca el pastel de cumpleaños para lanzar más confeti y celebrar</p>
+
+      <div class="cake-container" onclick="popCakeConfetti()">
+        <div class="cake-emoji">🎂</div>
+      </div>
+
+      <div>
+        <button class="music-btn" onclick="toggleAudio()">
+          <i class="fa-solid fa-music" id="music-icon"></i>
+          <span id="music-text">¡Lanzar más confeti y magia!</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Image Lightbox Modal -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="" alt="Ampliada" />
+  </div>
+
+  <!-- Audio Synthesizer / Audio Effects & Interactivity Script -->
+  <script>
+    let isOpened = false;
+
+    // Open Gift Trigger
+    function openGift() {
+      if (isOpened) return;
+      isOpened = true;
+
+      const giftLid = document.getElementById('gift-lid');
+      const giftScreen = document.getElementById('gift-screen');
+      const mainContent = document.getElementById('main-content');
+
+      // Animate lid off
+      giftLid.style.transform = 'translateY(-120px) rotate(-15deg)';
+
+      // Trigger massive confetti outburst
+      triggerConfettiBurst();
+
+      // Spawn balloons
+      spawnBalloons(15);
+
+      // Play joyful chime / melody via Web Audio API
+      playBirthdayChime();
+
+      // Transition screen after brief delay
+      setTimeout(() => {
+        giftScreen.classList.add('hidden');
+        mainContent.classList.add('visible');
+
+        // Continuous light confetti shower
+        startConfettiShower();
+      }, 700);
+    }
+
+    // Canvas Confetti Burst
+    function triggerConfettiBurst() {
+      const count = 200;
+      const defaults = {
+        origin: { y: 0.7 }
+      };
+
+      function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, {
+          particleCount: Math.floor(count * particleRatio)
+        }));
+      }
+
+      fire(0.25, {
+        spread: 26,
+        startVelocity: 55,
+        colors: ['#f472b6', '#fbbf24', '#a855f7']
+      });
+      fire(0.2, {
+        spread: 60,
+        colors: ['#ffffff', '#ec4899', '#38bdf8']
+      });
+      fire(0.35, {
+        spread: 100,
+        decay: 0.91,
+        scalar: 0.8
+      });
+      fire(0.1, {
+        spread: 120,
+        startVelocity: 25,
+        decay: 0.92,
+        colors: ['#fef08a', '#d8b4fe']
+      });
+      fire(0.1, {
+        spread: 120,
+        startVelocity: 45,
+      });
+    }
+
+    function popCakeConfetti() {
+      triggerConfettiBurst();
+      spawnBalloons(6);
+      playBirthdayChime();
+    }
+
+    function startConfettiShower() {
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        confetti({
+          particleCount: 3,
+          startVelocity: 0,
+          ticks: 200,
+          origin: {
+            x: Math.random(),
+            y: Math.random() - 0.2
+          },
+          colors: ['#f472b6', '#a855f7', '#fbbf24', '#ffffff'],
+          shapes: ['circle'],
+          gravity: 0.6,
+          scalar: 0.7
+        });
+      }, 250);
+    }
+
+    // Balloon Spawns
+    function spawnBalloons(amount) {
+      const container = document.getElementById('balloons-container');
+      const colors = ['#f472b6', '#a855f7', '#fbbf24', '#38bdf8', '#ec4899', '#c084fc'];
+
+      for (let i = 0; i < amount; i++) {
+        setTimeout(() => {
+          const balloon = document.createElement('div');
+          balloon.className = 'balloon';
+          
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          balloon.style.backgroundColor = color;
+          balloon.style.left = Math.random() * 90 + 5 + '%';
+          balloon.style.animationDuration = (Math.random() * 4 + 7) + 's';
+          
+          container.appendChild(balloon);
+
+          // Clean up after float animation finishes
+          setTimeout(() => {
+            balloon.remove();
+          }, 11000);
+        }, i * 300);
+      }
+    }
+
+    // Web Audio Synthesizer for Birthday Melody chime
+    function playBirthdayChime() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+
+        const notes = [261.63, 261.63, 293.66, 261.63, 349.23, 329.63]; // Happy birthday musical notes
+        const times = [0, 0.25, 0.5, 0.75, 1.0, 1.3];
+
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          
+          gain.gain.setValueAtTime(0.15, ctx.currentTime + times[idx]);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + times[idx] + 0.4);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(ctx.currentTime + times[idx]);
+          osc.stop(ctx.currentTime + times[idx] + 0.4);
+        });
+      } catch (e) {
+        console.log("Audio play blocked or unavailable");
+      }
+    }
+
+    function toggleAudio() {
+      popCakeConfetti();
+    }
+
+    // Lightbox for photos
+    function openLightbox(src) {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      lightboxImg.src = src;
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    // Interactive Sparkles on Canvas
+    const canvas = document.getElementById('sparkle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Sparkle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.alpha = Math.random();
+        this.speed = Math.random() * 0.02 + 0.005;
+        this.color = ['#f472b6', '#fbbf24', '#d8b4fe', '#ffffff'][Math.floor(Math.random() * 4)];
+      }
+      update() {
+        this.alpha += this.speed;
+        if (this.alpha > 1 || this.alpha < 0) {
+          this.speed = -this.speed;
+        }
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 40; i++) {
+      particles.push(new Sparkle());
+    }
+
+    function animateSparkles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateSparkles);
+    }
+    animateSparkles();
+  </script>
+</body>
+</html>
+```
